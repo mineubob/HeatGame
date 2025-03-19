@@ -62,8 +62,6 @@ internal class Program
     {
         if (!IsValidUnityDirectory(path)) return false;
 
-        if (!Path.HasExtension(path)) return false;
-
         return Path.GetExtension(path) == ".exe";
     }
 
