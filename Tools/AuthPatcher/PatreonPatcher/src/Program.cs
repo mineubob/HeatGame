@@ -52,7 +52,7 @@ internal class Program
 
     static bool IsValidUnityDirectory(string path)
     {
-        if (Path.HasExtension(path))
+        if (Path.GetExtension(path) == ".exe")
             path = Path.GetDirectoryName(path) ?? string.Empty;
 
         return File.Exists(Path.Combine(path, Constants.UnityPlayerAssembly));
