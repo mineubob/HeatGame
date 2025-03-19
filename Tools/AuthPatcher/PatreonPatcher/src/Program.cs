@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 [RequiresDynamicCode("Calls PatreonPatcher.src.Patcher.PatchAsync()")]
 internal class Program
 {
-    private static async Task Main(string[] args)
+    private static async Task<int> Main(string[] args)
     {
         string? gameDirectory = null;
         if (args.Length == 1)
@@ -20,7 +20,7 @@ internal class Program
         if ((gameDirectory ??= WaitUserSelectGameExecutable()) is null)
         {
             Logger.Error("Operation canceled by user.");
-            return;
+            return 1;
         }
 
         try
@@ -47,7 +47,11 @@ internal class Program
 #if DEBUG
             throw;
 #endif
+
+            return 1;
         }
+
+        return 0;
     }
 
     static bool IsValidUnityDirectory(string path)
