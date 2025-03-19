@@ -11,9 +11,9 @@ internal class Program
         if (args.Length == 1)
         {
             string path = args[0];
-            if (IsValidUnityDirectory(path))
+            if (IsValidGameExeFile(path))
             {
-                gameDirectory = Path.GetDirectoryName(path);
+                gameDirectory = path;
             }
         }
 
@@ -52,10 +52,19 @@ internal class Program
 
     static bool IsValidUnityDirectory(string path)
     {
-        if (Path.IsPathFullyQualified(path))
+        if (Path.HasExtension(path))
             path = Path.GetDirectoryName(path) ?? string.Empty;
 
         return File.Exists(Path.Combine(path, Constants.UnityPlayerAssembly));
+    }
+
+    static bool IsValidGameExeFile(string path)
+    {
+        if (!IsValidUnityDirectory(path)) return false;
+
+        if (!Path.HasExtension(path)) return false;
+
+        return Path.GetExtension(path) == ".exe"
     }
 
     static string? WaitUserSelectGameExecutable()
@@ -65,7 +74,7 @@ internal class Program
         {
             gameExecutable = WindowsUtils.ShowOpenFileDialog($"AntroHeat.exe\0*.exe\0");
 
-            if (gameExecutable == null || !IsValidUnityDirectory(gameExecutable))
+            if (gameExecutable == null || !IsValidGameExeFile(gameExecutable))
             {
                 if (!WindowsUtils.ShowOkCancelMessageBox("Please select the game executable or press cancel.", "Invalid game executable"))
                 {
