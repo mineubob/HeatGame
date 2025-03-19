@@ -64,7 +64,7 @@ internal class Program
 
         if (!Path.HasExtension(path)) return false;
 
-        return Path.GetExtension(path) == ".exe"
+        return Path.GetExtension(path) == ".exe";
     }
 
     static string? WaitUserSelectGameExecutable()
