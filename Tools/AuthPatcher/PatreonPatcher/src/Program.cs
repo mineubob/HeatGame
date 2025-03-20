@@ -122,7 +122,7 @@ internal class Program
         Console.ForegroundColor = prevColor;
         Console.WriteLine("Patching successful!");
         Console.WriteLine("Press any key to exit...");
-        Console.ReadKey();
+        WaitForUserInput();
     }
 
     public static void ShowErrorMessage()
@@ -149,6 +149,18 @@ internal class Program
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("Press any key to exit...");
         Console.ForegroundColor = prevColor;
-        Console.ReadKey();
+        WaitForUserInput();
+    }
+
+    public static void WaitForUserInput()
+    {
+        try
+        {
+            Console.ReadKey();
+        }
+        catch (System.InvalidOperationException)
+        {
+            // Ignore the exception if the In property is redirected from some stream other than the console.
+        }
     }
 }
