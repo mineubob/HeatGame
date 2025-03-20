@@ -14,6 +14,9 @@ internal class Program
             if (IsValidGameExeFile(path))
             {
                 gameDirectory = path;
+            } else {
+                Logger.Error($"Invalid game executable file: {path}");
+                return 1;
             }
         }
 
