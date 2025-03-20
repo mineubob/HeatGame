@@ -95,7 +95,7 @@ jobs:
           pip install pyinstaller
           pyinstaller --onefile heat_downloader/__main__.py --name HeatDownloader
           mkdir ../../output/HeatDownloader
-          mv dist\* ../../output/HeatDownloader/
+          mv dist/* ../../output/HeatDownloader/
 
       # Upload artifacts
       - name: Upload Artifacts
