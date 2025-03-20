@@ -1,6 +1,7 @@
 ﻿using PatreonPatcher;
 using PatreonPatcher.Helpers;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 
 [RequiresDynamicCode("Calls PatreonPatcher.src.Patcher.PatchAsync()")]
 internal class Program
@@ -14,16 +15,30 @@ internal class Program
             if (IsValidGameExeFile(path))
             {
                 gameDirectory = path;
-            } else {
+            }
+            else
+            {
                 Logger.Error($"Invalid game executable file: {path}");
                 return 1;
             }
         }
 
-        if ((gameDirectory ??= WaitUserSelectGameExecutable()) is null)
+
+        if (gameDirectory == null)
         {
-            Logger.Error("Operation canceled by user.");
-            return 1;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if ((gameDirectory = WaitUserSelectGameExecutable()) is null)
+                {
+                    Logger.Error("Operation canceled by user.");
+                    return 1;
+                }
+            }
+            else
+            {
+                Logger.Error("Path must be specified. Please specify the path to your game executable file.");
+                return 1;
+            }
         }
 
         try
