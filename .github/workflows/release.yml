@@ -6,8 +6,8 @@ on:
     #   - 'v*' # version trigger
 
 jobs:
-  build:
-    name: Build and Release
+  build_windows:
+    name: Build and Release Windows
     runs-on: windows-latest
 
     steps:
@@ -48,24 +48,95 @@ jobs:
           mkdir ../../output/HeatDownloader
           move dist\* ../../output/HeatDownloader/
 
-      # Compress artifacts
-      - name: Compress artifacts
+      # Upload artifacts
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: heat-tools-windows
+          path: output/*
+          if-no-files-found: error
+  build_linux:
+    name: Build and Release Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Setup .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0'
+
+      # Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.3'
+
+      # dotnet build
+      - name: Build AuthPatcher
+        working-directory: Tools/AuthPatcher
         run: |
-          powershell Compress-Archive -Path output\* -DestinationPath tools.zip
+          dotnet restore
+          dotnet publish -c Release -o ../../output/AuthPatcher
+
+      # python dependencies
+      - name: Install Python dependencies
+        working-directory: Tools/HeatDownloader
+        run: pip install -r requirements.txt
+
+      # PyInstaller build
+      - name: Build HeatDownloader
+        working-directory: Tools/HeatDownloader
+        run: |
+          pip install pyinstaller
+          pyinstaller --onefile heat_downloader/__main__.py --name HeatDownloader
+          mkdir ../../output/HeatDownloader
+          mv dist/* ../../output/HeatDownloader/
 
       # Upload artifacts
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: heat-tools
+          name: heat-tools-linux
           path: output/*
           if-no-files-found: error
+          
+  release:
+    name: Release tools
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs:
+      - build_windows
+      - build_linux
 
-      # release artifacts
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: heat-tools-windows
+          path: output-windows
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: heat-tools-linux
+          path: output-linux
+
+      - name: Compress linux artifacts
+        working-directory: output-linux
+        run: |
+          zip -r ../tools-linux.zip *
+
+      - name: Compress windows artifacts
+        working-directory: output-windows
+        run: |
+          zip -r ../tools-windows.zip *
+          
       - name: Create Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: tools.zip
-          token: ${{ secrets.GITHUB_TOKEN }}
-     
+          files: |
+            tools-linux.zip
+            tools-windows.zip
