@@ -85,19 +85,36 @@ if (-not (Test-Path $scriptsDir)) {
 }
 
 # Helper to invoke pip
-function Invoke-Pip([string[]]$Arguments) {
-    & $pipExec @($pipArgs + $Arguments)
+function Invoke-Pip {
+	param (
+		[Parameter(Mandatory=$true)]
+		[string[]]$Arguments 
+	)
+	try {
+		$process = Start-Process -FilePath $pipExec `
+								 -ArgumentList @($pipArgs + $Arguments) `
+								 -NoNewWindow -Wait `
+								 -PassThru `
+
+		if ($process.ExitCode -ne 0) {
+			throw "pip failed with exit code $($process.ExitCode). Check logs."
+		}
+	}
+	catch {
+		throw
+	}
 }
 
 # --- 5) Install the package in editable mode ---
 try {
-    Write-Host "==========| Installing package in editable mode |=========="
+    Write-Host ("==========| Installing package in editable mode |==========")
     Invoke-Pip -Arguments 'install','-e','.','--force-reinstall'
-    Write-Host ("="*40)
     Write-Ok "Installation attempt finished."
 } catch {
     Write-Err "Failed to install the package: $_"
     exit 1
+} finally {
+    Write-Host ("="*50)
 }
 
 # --- 6) Verify installation via 'pip show' ---
@@ -136,6 +153,6 @@ Write-Ok "`nPackage installed successfully! You can now use 'heat-downloader'."
 if ($pathOk) {
     Write-Ok "Just run: heat-downloader --help"
 } else {
-    Write-Warn ("Since Scripts is not in PATH, run directly: `"$scriptFullPath`"
-            Or as a module: `"$pythonExe -m heat_downloader --help")
+    Write-Warn ( "Since Scripts is not in PATH, run directly: `"$scriptFullPath`" `
+Or as a module: `"$pythonExe -m heat_downloader --help")
 }

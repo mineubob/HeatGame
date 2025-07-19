@@ -20,10 +20,10 @@ for /f "delims=" %%i in ('where python py 2^>nul') do (
 )
 :found_python_exe
 if not defined PYTHON (
-    call :echo_err Python not found in PATH. Please install Python 3.6 or later.
+    call :echo_err "Python not found in PATH. Please install Python 3.6 or later."
     exit /b 1
 )
-echo Found Python executable at: !PYTHON!
+echo "Found Python executable at: !PYTHON!"
 
 REM === Use the pip module as the PIP command ===
 if %pip_exists% NEQ 0 (
@@ -33,14 +33,14 @@ if %pip_exists% NEQ 0 (
 REM === Check if PYTHON points to the windows python launcher and set PYTHON_PATH ===
 !PYTHON! -0p >nul 2>&1
 if !errorlevel! NEQ 0 (
-    echo No python launcher found.
+    echo "No python launcher found."
     for %%I in ("!PYTHON!") do (
         set "PYTHON_PATH=%%~dpI"
         if "!PYTHON_PATH:~-1!"=="\" set "PYTHON_PATH=!PYTHON_PATH:~0,-1!"
     )
 ) else (
     REM === Resolve the actual python executable path (active python) ===
-    echo Found Windows Python launcher
+    echo "Found Windows Python launcher"
     for /f "delims=" %%i in ('py -0p 2^>nul') do (
         for /f "tokens=3*" %%a in ("%%i") do (
             set "PYTHON_EXE=%%a %%b"
@@ -48,10 +48,10 @@ if !errorlevel! NEQ 0 (
                 set "PYTHON_PATH=%%~dpF"
                 if "!PYTHON_PATH:~-1!"=="\" set "PYTHON_PATH=!PYTHON_PATH:~0,-1!"
             )
-            echo Python version found: %%a at !PYTHON_PATH!
+            echo "Python version found: %%a at !PYTHON_PATH!"
             !PYTHON! -h | findstr /C:"!PYTHON_PATH!" >nul 2>&1
             if !errorlevel! EQU 0 (
-                echo Active python path: !PYTHON_PATH!
+                echo "Active python path: !PYTHON_PATH!"
                 goto :check_python
             ) else (
                 set "PYTHON_PATH="
@@ -63,7 +63,7 @@ if !errorlevel! NEQ 0 (
 
 :check_python
 if not defined PYTHON_PATH (
-    call :echo_err Failed to determine Python path.
+    call :echo_err "Failed to determine Python path."
     exit /b 1
 )
 !PYTHON! --version | findstr /R "^Python 3\.[0-9]*" >nul 2>&1
