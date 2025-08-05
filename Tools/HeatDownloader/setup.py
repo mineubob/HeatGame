@@ -1,11 +1,19 @@
 from setuptools import setup, find_packages
 from pathlib import Path
 
-from heat_downloader import __version__
+# TODO: fix this crap later
+def read_version():
+    version_file = Path('heat_downloader/__init__.py').read_text()
+    for line in version_file.splitlines():
+        if line.startswith('__version__'):
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    raise RuntimeError("Unable to find version string.")
+
 
 setup(
     name = 'heat-downloader',
-    version = __version__,
+    version = read_version(),
     description = 'A tool to download the latest Heat releases',
     author = 'Yossi99',
     packages = find_packages(),
